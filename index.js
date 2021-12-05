@@ -16,9 +16,15 @@ const results = document.querySelector('.results');
 const onInput = debounceInput(async (e) => {
 	const movies = await fetchMovies(e.target.value);
 	console.log(movies);
+	if (results.firstChild) {
+		while (results.firstChild) {
+			results.removeChild(results.firstChild);
+		}
+	}
 	dropdown.classList.add('is-active');
 	for (let movie of movies) {
 		const div = document.createElement('div');
+		const imgSrc = movie.Poster === 'N/A' ? '' : movie.Poster;
 		div.id = movie.imdbID;
 		div.classList.add('dropdown-item');
 		div.addEventListener('click', (e) => {
@@ -26,7 +32,7 @@ const onInput = debounceInput(async (e) => {
 			fetchMovieInfo(e.target.id);
 		});
 		div.innerHTML = `
-        <img src="${movie.Poster}" />
+        <img src="${imgSrc}" />
         <h1>${movie.Title}</h1>
         <p class="movie-year">${movie.Year}</p>
         `;
