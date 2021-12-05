@@ -1,3 +1,9 @@
+document.addEventListener('click', (e) => {
+	if (!dropdownContainer.contains(e.target)) {
+		dropdown.classList.remove('is-active');
+	}
+});
+
 const dropdownContainer = document.querySelector('.dropdown-container');
 dropdownContainer.innerHTML = `
 <label for="movieInput1"><b>Movie Title</b></label>
@@ -15,13 +21,20 @@ const results = document.querySelector('.results');
 
 const onInput = debounceInput(async (e) => {
 	const movies = await fetchMovies(e.target.value);
-	console.log(movies);
 	if (results.firstChild) {
 		while (results.firstChild) {
 			results.removeChild(results.firstChild);
 		}
 	}
 	dropdown.classList.add('is-active');
+	if (typeof movies === 'string') {
+		const div = document.createElement('div');
+		const msg = movies === 'Incorrect IMDb ID.' ? '' : movies;
+		div.classList.add('dropdown-item');
+		div.innerHTML = `<h1>${msg}</h1>`;
+		results.append(div);
+		return;
+	}
 	for (let movie of movies) {
 		const div = document.createElement('div');
 		const imgSrc = movie.Poster === 'N/A' ? '' : movie.Poster;
@@ -56,6 +69,7 @@ const fetchMovies = async (movie) => {
 		return res.data.Search;
 	} catch (e) {
 		console.log(e.message);
+		return e.message;
 	}
 };
 
