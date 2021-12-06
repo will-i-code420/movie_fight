@@ -26,10 +26,6 @@ figure .image img {
 	background-color: aliceblue;
 }
 
-.movie-year {
-	margin-left: .75em;
-}
-
 .results {
 	max-height: 500px;
 	overflow-y: scroll;
