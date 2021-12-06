@@ -29,7 +29,7 @@ const onInput = debounceInput(async (e) => {
 	dropdown.classList.add('is-active');
 	if (typeof movies === 'string') {
 		const div = document.createElement('div');
-		const msg = movies === 'Incorrect IMDb ID.' ? '' : movies;
+		const msg = movies === 'Incorrect IMDb ID.' ? 'No Results...' : movies;
 		div.classList.add('dropdown-item');
 		div.innerHTML = `<h1>${msg}</h1>`;
 		results.append(div);
@@ -38,11 +38,11 @@ const onInput = debounceInput(async (e) => {
 	for (let movie of movies) {
 		const div = document.createElement('div');
 		const imgSrc = movie.Poster === 'N/A' ? '' : movie.Poster;
-		div.id = movie.imdbID;
 		div.classList.add('dropdown-item');
-		div.addEventListener('click', (e) => {
-			if (!e.target.id) return fetchMovieInfo(e.target.parentElement.id);
-			fetchMovieInfo(e.target.id);
+		div.addEventListener('click', () => {
+			movieInput1.value = movie.Title;
+			dropdown.classList.remove('is-active');
+			fetchMovieInfo(movie.imdbID);
 		});
 		div.innerHTML = `
         <img src="${imgSrc}" />
@@ -83,7 +83,67 @@ const fetchMovieInfo = async (id) => {
 		});
 		console.log(movie.data);
 		if (movie.data.Error) throw new Error(movie.data.Error);
+		document.querySelector('.movie-info-container').innerHTML = movieInfoTemplate(movie.data);
 	} catch (e) {
 		console.log(e.message);
 	}
+};
+
+const movieInfoTemplate = (movieInfo) => {
+	return `
+    <article class="media">
+    <figure class="media-left">
+    <p class="image">
+    <img src="${movieInfo.Poster}"/>
+    </p>
+    </figure>
+    <div class="media-content">
+    <div class="content">
+    <h1>${movieInfo.Title}</h1>
+    <h2>${movieInfo.Genre}</h2>
+    <p>${movieInfo.Plot}</p>
+    </div>
+    </div>
+    </article>
+    <article class="notification is-primary">
+    <p class="title">
+    ${movieInfo.Awards}
+    </p>
+    <p class="subtitle>
+    award
+    </p>
+    </article>
+    <article class="notification is-primary">
+    <p class="title">
+    ${movieInfo.BoxOffice}
+    </p>
+    <p class="subtitle>
+    box office
+    </p>
+    </article>
+    <article class="notification is-primary">
+    <p class="title">
+    ${movieInfo.Metascore}
+    </p>
+    <p class="subtitle>
+    metascore
+    </p>
+    </article>
+    <article class="notification is-primary">
+    <p class="title">
+    ${movieInfo.imdbRating}
+    </p>
+    <p class="subtitle>
+    imdb rating
+    </p>
+    </article>
+    <article class="notification is-primary">
+    <p class="title">
+    ${movieInfo.imdbVotes}
+    </p>
+    <p class="subtitle>
+    imdb votes
+    </p>
+    </article>
+    `;
 };
