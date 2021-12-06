@@ -6,10 +6,6 @@ const autoCompleteConfig = {
         <h1>${item.Title} (${item.Year})</h1>
         `;
 	},
-	onItemSelect(itemId) {
-		document.querySelector('.tutorial').classList.add('is-hidden');
-		fetchMovieInfo(itemId);
-	},
 	inputValue(itemValue) {
 		return itemValue;
 	},
@@ -32,7 +28,9 @@ const autoCompleteConfig = {
 	}
 };
 
-const fetchMovieInfo = async (id) => {
+let leftMovie;
+let rightMovie;
+const fetchMovieInfo = async (id, el, side) => {
 	try {
 		const movie = await axios.get('http://www.omdbapi.com/', {
 			params: {
@@ -40,9 +38,18 @@ const fetchMovieInfo = async (id) => {
 				i: id
 			}
 		});
-		console.log(movie.data);
 		if (movie.data.Error) throw new Error(movie.data.Error);
-		document.querySelector('.movie-info-container').innerHTML = movieInfoTemplate(movie.data);
+		switch (side) {
+			case 'left':
+				leftMovie = movie.data;
+				break;
+			case 'right':
+				rightMovie = movie.data;
+				break;
+			default:
+				break;
+		}
+		el.innerHTML = movieInfoTemplate(movie.data);
 	} catch (e) {
 		console.log(e.message);
 	}
@@ -109,9 +116,17 @@ const movieInfoTemplate = (movieInfo) => {
 
 createAutoComplete({
 	...autoCompleteConfig,
-	rootEl: document.querySelector('#left-autocomplete')
+	rootEl: document.querySelector('#left-autocomplete'),
+	onItemSelect(itemId) {
+		document.querySelector('.tutorial').classList.add('is-hidden');
+		fetchMovieInfo(itemId, document.querySelector('#left-summary', 'left'));
+	}
 });
 createAutoComplete({
 	...autoCompleteConfig,
-	rootEl: document.querySelector('#right-autocomplete')
+	rootEl: document.querySelector('#right-autocomplete'),
+	onItemSelect(itemId) {
+		document.querySelector('.tutorial').classList.add('is-hidden');
+		fetchMovieInfo(itemId, document.querySelector('#right-summary', 'right'));
+	}
 });
