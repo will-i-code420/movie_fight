@@ -1,3 +1,37 @@
+const autoCompleteConfig = {
+	renderItem(item) {
+		const imgSrc = item.Poster === 'N/A' ? '' : item.Poster;
+		return `
+        <img src="${imgSrc}" />
+        <h1>${item.Title} (${item.Year})</h1>
+        `;
+	},
+	onItemSelect(itemId) {
+		document.querySelector('.tutorial').classList.add('is-hidden');
+		fetchMovieInfo(itemId);
+	},
+	inputValue(itemValue) {
+		return itemValue;
+	},
+	async fetchData(searchInfo) {
+		try {
+			const res = await axios.get('http://www.omdbapi.com/', {
+				params: {
+					apikey: '40c22a0b',
+					type: 'movie',
+					s: searchInfo,
+					r: 'json'
+				}
+			});
+			if (res.data.Error) throw new Error(res.data.Error);
+			return res.data.Search;
+		} catch (e) {
+			console.log(e.message);
+			return e.message;
+		}
+	}
+};
+
 const fetchMovieInfo = async (id) => {
 	try {
 		const movie = await axios.get('http://www.omdbapi.com/', {
@@ -74,35 +108,10 @@ const movieInfoTemplate = (movieInfo) => {
 };
 
 createAutoComplete({
-	rootEl: document.querySelector('.autocomplete'),
-	renderItem(item) {
-		const imgSrc = item.Poster === 'N/A' ? '' : item.Poster;
-		return `
-        <img src="${imgSrc}" />
-        <h1>${item.Title} (${item.Year})</h1>
-        `;
-	},
-	onItemSelect(itemId) {
-		fetchMovieInfo(itemId);
-	},
-	inputValue(itemValue) {
-		return itemValue;
-	},
-	async fetchData(searchInfo) {
-		try {
-			const res = await axios.get('http://www.omdbapi.com/', {
-				params: {
-					apikey: '40c22a0b',
-					type: 'movie',
-					s: searchInfo,
-					r: 'json'
-				}
-			});
-			if (res.data.Error) throw new Error(res.data.Error);
-			return res.data.Search;
-		} catch (e) {
-			console.log(e.message);
-			return e.message;
-		}
-	}
+	...autoCompleteConfig,
+	rootEl: document.querySelector('#left-autocomplete')
+});
+createAutoComplete({
+	...autoCompleteConfig,
+	rootEl: document.querySelector('#right-autocomplete')
 });
